@@ -147,7 +147,7 @@ rl:
   prm_model: gpt-5.2
   prm_api_key: ""
   lora_rank: 32
-  batch_size: 8
+  batch_size: 4
   evolver_api_base: ""      # 留空则复用 llm.api_base
   evolver_api_key: ""
   evolver_model: gpt-5.2
