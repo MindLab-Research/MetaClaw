@@ -8,23 +8,43 @@
 
 <p>
   <a href="https://github.com/aiming-lab/MetaClaw"><img src="https://img.shields.io/badge/github-MetaClaw-181717?style=flat&labelColor=555&logo=github&logoColor=white" alt="GitHub"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-green?style=flat&labelColor=555" alt="License MIT"></a>
   <img src="https://img.shields.io/badge/⚡_Fully_Async-yellow?style=flat&labelColor=555" alt="Fully Async" />
   <img src="https://img.shields.io/badge/☁️_No_GPU_Cluster-blue?style=flat&labelColor=555" alt="No GPU Cluster" />
   <img src="https://img.shields.io/badge/🛠️_Skill_Evolution-orange?style=flat&labelColor=555" alt="Skill Evolution" />
   <img src="https://img.shields.io/badge/🚀_One--Click_Deploy-green?style=flat&labelColor=555" alt="One-Click Deploy" />
 </p>
 
-<p align="center">
-  <video src="assets/video.mp4" controls width="600"></video>
-</p>
+<br/>
 
+[🇨🇳 中文](./assets/README_ZH.md) • [🇯🇵 日本語](./assets/README_JA.md) • [🇰🇷 한국어](./assets/README_KO.md) • [🇫🇷 Français](./assets/README_FR.md) • [🇩🇪 Deutsch](./assets/README_DE.md) • [🇪🇸 Español](./assets/README_ES.md)
+
+<br/>
+
+</div>
+
+---
+
+<div align="center">
+
+### Two commands. That's it.
+</div>
+
+```bash
+metaclaw setup              # one-time config wizard
+metaclaw start              # skills on, OpenClaw wired — ready to chat
+metaclaw start --mode rl    # optional: + live RL training via Tinker
+```
+
+<div align="center">
+<img src="assets/metaclaw.gif" alt="MetaClaw demo" width="700">
 </div>
 
 ---
 
 ## 🔥 News
 
-- **[03/11/2026]** **v0.2.0** — One-click deployment via `metaclaw` CLI. Skills enabled by default, RL is now opt-in.
+- **[03/10/2026]** **v0.2** — One-click deployment via `metaclaw` CLI. Skills enabled by default, RL is now opt-in.
 - **[03/09/2026]** We release **MetaClaw** — Just talk to your agent and let it evolve automatically. **NO** GPU deployment required; just plug into the **API**.
 
 ---
@@ -240,7 +260,7 @@ See `examples/run_conversation_opd.py` for a programmatic example and `scripts/r
 
 ```bibtex
 @misc{xia2026metaclaw,
-  author       = {Xia, Peng and Chen, Jianwen and Yang, Xinyu and Han, Siwei and Qiu, Shi and Zheng, Zeyu and Xie, Cihang and Yao, Huaxiu},
+  author       = {Xia, Peng and Chen, Jianwen and Yang, Xinyu and Tu, Haoqin and Han, Siwei and Qiu, Shi and Zheng, Zeyu and Xie, Cihang and Yao, Huaxiu},
   title        = {MetaClaw},
   year         = {2026},
   organization = {GitHub},
