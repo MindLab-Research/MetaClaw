@@ -156,9 +156,12 @@ Serving, Reward Modeling und Training sind vollständig entkoppelt. Der Agent an
 pip install -e .                        # skills_only-Modus (leichtgewichtig)
 pip install -e ".[rl]"                  # + RL-Trainingsunterstützung (torch, transformers, tinker)
 pip install -e ".[evolve]"              # + Skill-Evolution via OpenAI-kompatibler LLM
+pip install mindlab-toolkit             # + optionales MinT-Kompatibilitäts-Backend
 pip install -e ".[scheduler]"           # + Google Calendar Integration für Scheduler
 pip install -e ".[rl,evolve,scheduler]" # empfohlen: vollständiges RL + Scheduler-Setup
 ```
+
+`mindlab-toolkit` wird nur benötigt, wenn du `rl.backend=mint` verwenden willst. MinT-Links: [Überblick](https://mint-doc.macaron.im/), [Tinker-Kompatibilität](https://mint-doc.macaron.im/using-the-api/tinker-compatibility), [Modellliste](https://mint-doc.macaron.im/using-the-api/model-lineup), [GitHub](https://github.com/MindLab-Research/mindlab-toolkit).
 
 ### 2. Konfiguration
 
@@ -167,6 +170,19 @@ metaclaw setup
 ```
 
 Der interaktive Assistent führt dich durch die Auswahl des LLM-Anbieters (Kimi, Qwen, MiniMax oder benutzerdefiniert), API-Schlüssel und optionale RL-Aktivierung.
+
+Der RL-Pfad von MetaClaw behält Tinker als Standard-Referenzbackend. `rl.backend=auto` ist die empfohlene Voreinstellung und kann bei installiertem MinT-Kompatibilitätspaket auch MinT anhand Mint-typischer Credentials oder Base-URLs erkennen. Wenn du denselben Workflow auf MinT richten willst, kannst du Folgendes setzen:
+
+```bash
+metaclaw config rl.backend mint
+metaclaw config rl.api_key sk-mint-...
+metaclaw config rl.base_url https://mint-cn.macaron.xin/  # Festlandchina; sonst https://mint.macaron.xin/
+metaclaw config rl.model Qwen/Qwen3-4B-Instruct-2507
+```
+
+Nutze `https://mint-cn.macaron.xin/` für Festlandchina oder `https://mint.macaron.xin/` andernfalls.
+
+Die Legacy-Aliase `rl.tinker_api_key` und `rl.tinker_base_url` werden aus Kompatibilitätsgründen weiterhin akzeptiert.
 
 ### 3. Start
 
@@ -195,7 +211,9 @@ metaclaw config KEY VALUE       # Konfigurationswert setzen
 
 ```bash
 metaclaw config rl.enabled true           # RL-Training aktivieren
-metaclaw config rl.tinker_api_key sk-...  # Tinker-Schlüssel setzen
+metaclaw config rl.backend auto           # auto | tinker | mint
+metaclaw config rl.api_key sk-...         # Schlüssel für das RL-Backend setzen
+metaclaw config rl.base_url https://mint-cn.macaron.xin/  # MinT-Endpunkt für Festlandchina; sonst https://mint.macaron.xin/
 metaclaw config skills.auto_evolve false  # Automatische Skill-Zusammenfassung deaktivieren
 metaclaw config proxy.port 31000          # Proxy-Port ändern
 ```
@@ -228,8 +246,12 @@ skills:
 
 rl:
   enabled: false            # auf true setzen, um RL-Training zu aktivieren
+  backend: auto             # "auto" | "tinker" | "mint"
   model: moonshotai/Kimi-K2.5
-  tinker_api_key: ""
+  api_key: ""
+  base_url: ""              # optionaler Backend-Endpunkt, z. B. https://mint-cn.macaron.xin/ (Festlandchina) oder https://mint.macaron.xin/ für MinT
+  tinker_api_key: ""        # Legacy-Alias für api_key
+  tinker_base_url: ""       # Legacy-Alias für base_url
   prm_url: https://api.openai.com/v1
   prm_model: gpt-5.2
   prm_api_key: ""
@@ -279,21 +301,32 @@ cp -r memory_data/skills/* ~/.metaclaw/skills/
 
 ## 🔬 Erweitert: RL-Modus
 
-RL-Training aktivieren, um das Modell kontinuierlich aus Live-Gesprächen feinabzustimmen:
+RL-Training aktivieren, um das Modell kontinuierlich aus Live-Gesprächen feinabzustimmen. Tinker bleibt der Standard-Referenzpfad, und MetaClaw kann denselben Workflow auch auf MinT als Tinker-kompatible Alternative richten:
 
 ```bash
 metaclaw config rl.enabled true
-metaclaw config rl.tinker_api_key sk-...
+metaclaw config rl.backend auto
+metaclaw config rl.api_key sk-...
 metaclaw config rl.prm_url https://api.openai.com/v1
 metaclaw config rl.prm_api_key sk-...
 metaclaw start
 ```
 
+Wenn du denselben Workflow auf MinT ausführen willst, ergänze Backend, Endpunkt und Modell:
+
+```bash
+metaclaw config rl.backend mint
+metaclaw config rl.base_url https://mint-cn.macaron.xin/  # Festlandchina; sonst https://mint.macaron.xin/
+metaclaw config rl.model Qwen/Qwen3-4B-Instruct-2507
+```
+
 Im RL-Modus:
 - Jeder Gesprächszug wird tokenisiert und als Trainingsbeispiel eingereicht
 - Ein Richter-LLM (PRM) bewertet Antworten asynchron
-- Tinker Cloud führt LoRA-Fine-Tuning durch; aktualisierte Gewichte werden alle `batch_size` Samples hot-geswappt
+- Standardmäßig übernimmt Tinker Cloud das LoRA-Fine-Tuning; MetaClaw kann aber auch mit einer kompatiblen Alternative wie MinT arbeiten, und aktualisierte Gewichte werden alle `batch_size` Samples hot-geswappt
 - Ein dediziertes Evolver-LLM extrahiert neue Skills aus fehlgeschlagenen Episoden
+
+Wenn du bei Tinker Cloud bleiben willst, nutze `rl.backend=auto` oder `rl.backend=tinker`. Für MinT setze `rl.backend=mint` und konfiguriere den entsprechenden Endpunkt.
 
 **Programmatisches Rollout** (keine OpenClaw TUI nötig): `openclaw_env_data_dir` auf ein Verzeichnis mit JSONL-Aufgabendateien setzen:
 
@@ -358,13 +391,16 @@ Jedes `ConversationSample` wird mit einer `skill_generation`-Version getaggt. We
 
 ## 🙏 Danksagungen
 
-MetaClaw baut auf folgenden Open-Source-Projekten auf:
+MetaClaw baut auf folgenden Open-Source-Projekten und Kollaborationen auf:
 
 - [OpenClaw](https://openclaw.ai) — das zentrale Agent-Framework.
 - [SkillRL](https://github.com/aiming-lab/SkillRL) — unser skill-erweitertes RL-Framework.
-- [Tinker](https://www.thinkingmachines.ai/tinker/) — für Online-RL-Training verwendet.
+- [Tinker](https://www.thinkingmachines.ai/tinker/) — das primäre Referenz-Backend für Online-RL-Training in MetaClaw.
+- [MinT](https://mint-doc.macaron.im/) — eine Tinker-kompatible Alternative von [Mind Lab](https://macaron.im/mindlab), verfügbar über [`mindlab-toolkit`](https://github.com/MindLab-Research/mindlab-toolkit); unterstützte Modelle stehen auf der [offiziellen Modellliste](https://mint-doc.macaron.im/using-the-api/model-lineup).
 - [OpenClaw-RL](https://github.com/Gen-Verse/OpenClaw-RL) — Inspiration für unser RL-Design.
 - [awesome-openclaw-skills](https://github.com/VoltAgent/awesome-openclaw-skills) — stellt die Grundlage für unsere Skill-Bank bereit.
+
+Die MinT-Kompatibilitätsarbeit in diesem Repository ist ein Ergebnis der Zusammenarbeit zwischen dem MetaClaw-Projektteam und [Mind Lab](https://macaron.im/mindlab). Mind Lab konzentriert sich in dieser Zusammenarbeit vor allem auf Infrastrukturforschung und LoRA-RL-Algorithmusoptimierung.
 
 ---
 
