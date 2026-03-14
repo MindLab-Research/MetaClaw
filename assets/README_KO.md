@@ -112,7 +112,7 @@ https://github.com/user-attachments/assets/d86a41a8-4181-4e3a-af0e-dc453a6b8594
 
 내부적으로 모델을 OpenAI 호환 프록시 뒤에 배치하고, OpenClaw를 통해 인터랙션을 인터셉트하며, 매 턴마다 관련 스킬을 주입하고, 축적된 경험으로부터 메타러닝합니다. 세션 종료 후 스킬이 자동 요약되며, RL 활성화 시 메타러닝 스케줄러가 가중치 업데이트를 유휴 시간대로 연기하여 활성 사용 중 에이전트 중단을 방지합니다.
 
-GPU 클러스터가 필요 없습니다. MetaClaw는 OpenAI 호환 LLM API와 함께 동작하며, 클라우드 기반 LoRA 학습에는 Tinker 호환 백엔드를 사용합니다. [Tinker](https://www.thinkingmachines.ai/tinker/)가 기본 기준 경로이고, 필요하면 별도 호환 패키지를 통해 MinT도 활성화할 수 있습니다.
+GPU 클러스터가 필요 없습니다. MetaClaw는 OpenAI 호환 LLM API와 함께 동작하며, 클라우드 기반 LoRA 학습에는 Tinker 호환 백엔드를 사용합니다. [Tinker](https://www.thinkingmachines.ai/tinker/)가 기본 기준 경로이고, 필요하면 별도 호환 패키지를 통해 [MinT](https://github.com/MindLab-Research/mindlab-toolkit)도 활성화할 수 있습니다.
 
 ## 🤖 주요 기능
 

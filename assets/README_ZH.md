@@ -112,7 +112,7 @@ https://github.com/user-attachments/assets/d86a41a8-4181-4e3a-af0e-dc453a6b8594
 
 在底层，它将你的模型封装为 OpenAI 兼容代理，通过 OpenClaw 拦截实时对话，在每轮对话中注入相关 Skill，并从积累的交互经验中元学习。每次会话结束后自动总结新 Skill；开启 RL 后，元学习调度器会将权重更新推迟到空闲窗口，确保活跃使用期间不受干扰。
 
-无需 GPU 集群。MetaClaw 兼容任意 OpenAI 格式的 LLM API，并通过 Tinker 兼容后端进行云端 LoRA 微调。[Tinker](https://www.thinkingmachines.ai/tinker/) 是默认参考路径；如果需要，也可以通过单独安装的兼容包接入 MinT。
+无需 GPU 集群。MetaClaw 兼容任意 OpenAI 格式的 LLM API，并通过 Tinker 兼容后端进行云端 LoRA 微调。[Tinker](https://www.thinkingmachines.ai/tinker/) 是默认参考路径；如果需要，也可以通过单独安装的兼容包接入 [MinT](https://github.com/MindLab-Research/mindlab-toolkit)。
 
 ## 🤖 核心功能
 

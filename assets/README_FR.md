@@ -112,7 +112,7 @@ Parlez simplement à votre agent comme d'habitude — MetaClaw transforme chaque
 
 Sous le capot, il encapsule votre modèle derrière un proxy compatible OpenAI, intercepte les interactions via OpenClaw, injecte les skills pertinents à chaque tour, et méta-apprend à partir de l'expérience accumulée. Les skills sont résumés automatiquement après chaque session ; avec le RL activé, un planificateur de méta-apprentissage reporte les mises à jour des poids aux fenêtres d'inactivité pour ne jamais interrompre l'agent pendant l'utilisation active.
 
-Aucun cluster GPU nécessaire. MetaClaw fonctionne avec n'importe quelle API LLM compatible OpenAI et utilise un backend compatible Tinker pour l'entraînement LoRA dans le cloud. [Tinker](https://www.thinkingmachines.ai/tinker/) reste le chemin de référence par défaut ; MinT peut être activé via un paquet de compatibilité séparé si nécessaire.
+Aucun cluster GPU nécessaire. MetaClaw fonctionne avec n'importe quelle API LLM compatible OpenAI et utilise un backend compatible Tinker pour l'entraînement LoRA dans le cloud. [Tinker](https://www.thinkingmachines.ai/tinker/) reste le chemin de référence par défaut ; [MinT](https://github.com/MindLab-Research/mindlab-toolkit) peut être activé via un paquet de compatibilité séparé si nécessaire.
 
 ## 🤖 Fonctionnalités principales
 

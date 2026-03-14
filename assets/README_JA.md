@@ -112,7 +112,7 @@ https://github.com/user-attachments/assets/d86a41a8-4181-4e3a-af0e-dc453a6b8594
 
 内部では、モデルを OpenAI 互換プロキシの背後に配置し、OpenClaw 経由でインタラクションをインターセプト。各ターンで関連スキルを注入し、蓄積された経験からメタ学習します。セッション終了後にスキルが自動集約され、RL 有効時にはメタ学習スケジューラがウェイト更新をアイドル時間帯に延期し、アクティブ利用中のエージェント中断を防ぎます。
 
-GPU クラスタは不要です。MetaClaw は任意の OpenAI 互換 LLM API で動作し、クラウドベースの LoRA トレーニングには Tinker 互換バックエンドを利用します。[Tinker](https://www.thinkingmachines.ai/tinker/) が標準の参照パスで、必要に応じて MinT を別途互換パッケージ経由で有効化できます。
+GPU クラスタは不要です。MetaClaw は任意の OpenAI 互換 LLM API で動作し、クラウドベースの LoRA トレーニングには Tinker 互換バックエンドを利用します。[Tinker](https://www.thinkingmachines.ai/tinker/) が標準の参照パスで、必要に応じて [MinT](https://github.com/MindLab-Research/mindlab-toolkit) を別途互換パッケージ経由で有効化できます。
 
 ## 🤖 主な機能
 
