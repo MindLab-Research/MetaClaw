@@ -137,7 +137,7 @@ https://github.com/user-attachments/assets/d86a41a8-4181-4e3a-af0e-dc453a6b8594
 
 在底层,它将你的模型封装为 OpenAI 兼容代理,通过 OpenClaw 拦截实时对话,在每轮对话中注入相关 Skill,并从积累的交互经验中元学习。每次会话结束后自动总结新 Skill；开启 RL 后,元学习调度器会将权重更新推迟到空闲窗口,确保活跃使用期间不受干扰。
 
-无需 GPU 集群。MetaClaw 兼容任意 OpenAI 格式的 LLM API,并通过 Tinker 兼容后端进行云端 LoRA 微调。[Tinker](https://www.thinkingmachines.ai/tinker/) 是默认参考路径；如果需要,也可以通过单独安装的兼容包接入 MinT。
+无需 GPU 集群。MetaClaw 兼容任意 OpenAI 格式的 LLM API,并通过 Tinker 兼容后端进行云端 LoRA 微调。[Tinker](https://www.thinkingmachines.ai/tinker/) 是默认参考路径；如果需要,也可以通过专用的 `.[mint]` extra 接入 MinT。
 
 ## 🤖 核心功能
 
@@ -163,13 +163,15 @@ https://github.com/user-attachments/assets/d86a41a8-4181-4e3a-af0e-dc453a6b8594
 
 ```bash
 pip install -e .                        # skills_only 模式（轻量）
-pip install -e ".[rl]"                  # + RL 训练支持（torch、transformers、tinker）
+pip install -e ".[rl]"                  # + Tinker RL 训练支持（torch、transformers、tinker）
+pip install -e ".[mint]"                # + MinT RL 训练支持（mindlab-toolkit、tinker==0.6.0）
 pip install -e ".[evolve]"              # + 通过 OpenAI 兼容 LLM 进行 Skill 进化
 pip install -e ".[scheduler]"           # + Google Calendar 调度器集成
-pip install -e ".[rl,evolve,scheduler]" # 推荐：完整 RL + 调度器配置
+pip install -e ".[rl,evolve,scheduler]" # 推荐：完整 Tinker RL + 调度器配置
+pip install -e ".[mint,evolve,scheduler]" # 推荐：完整 MinT RL + 调度器配置
 ```
 
-如果你要使用 `rl.backend=mint`,请在同一环境里额外安装 MinT 兼容包,例如 [`mindlab-toolkit`](https://github.com/MindLab-Research/mindlab-toolkit)。MetaClaw 不会把这个依赖放进默认安装中,这样 RL 用户可以明确选择 Tinker 或 MinT。
+如果你要使用 `rl.backend=mint`,优先执行 `pip install -e ".[mint]"`。这条安装路径会自动安装 [`mindlab-toolkit`](https://github.com/MindLab-Research/mindlab-toolkit) 和兼容的 `tinker==0.6.0`。
 
 ### 2. 配置
 
@@ -179,7 +181,7 @@ metaclaw setup
 
 交互式向导会引导你选择 LLM 提供商（Kimi、Qwen、MiniMax 或自定义）,填写 API Key,并可选开启 RL 训练。
 
-MetaClaw 的 RL 路径可以显式切换 `tinker` 和 `mint`。推荐默认值是 `auto`；当环境里安装了 MinT 兼容包时,它仍然可以根据 Mint 风格的凭证或 base URL 自动识别 MinT。
+MetaClaw 的 RL 路径可以显式切换 `tinker` 和 `mint`。推荐默认值仍然是 `auto`；它会根据 `MINT_*` 环境变量或 MinT 风格的 base URL 识别 MinT，但如果环境里缺少 MinT 支持，现在会直接报错并给出安装提示。
 
 **Tinker**（默认）:
 
@@ -193,7 +195,7 @@ metaclaw config rl.model moonshotai/Kimi-K2.5
 
 ```bash
 metaclaw config rl.backend mint
-metaclaw config rl.api_key sk-mint-...
+metaclaw config rl.api_key your-mint-api-key
 metaclaw config rl.base_url https://mint.macaron.xin/
 metaclaw config rl.model Qwen/Qwen3-4B-Instruct-2507
 ```
@@ -327,11 +329,18 @@ metaclaw config rl.prm_api_key sk-...
 metaclaw start --mode rl
 ```
 
+在把 `rl.backend` 设为 `mint` 之前,请先在当前环境执行：
+
+```bash
+pip install -e ".[mint]"
+```
+
 **MinT**:
 
 ```bash
+metaclaw config rl.enabled true
 metaclaw config rl.backend mint
-metaclaw config rl.api_key sk-mint-...
+metaclaw config rl.api_key your-mint-api-key
 metaclaw config rl.base_url https://mint.macaron.xin/
 metaclaw config rl.model Qwen/Qwen3-4B-Instruct-2507
 metaclaw config rl.prm_url https://api.openai.com/v1

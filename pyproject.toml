@@ -23,6 +23,12 @@ rl = [
     "transformers>=4.51.1",
     "tinker",
 ]
+# Full RL training via MinT compatibility layer.
+mint = [
+    "torch",
+    "transformers>=4.51.1",
+    "mindlab-toolkit @ git+https://github.com/MindLab-Research/mindlab-toolkit.git@e75a8720a97f4de0335617a4968f7b489758ae8a",
+]
 # Embedding-based skill retrieval
 embedding = [
     "numpy",

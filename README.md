@@ -135,7 +135,7 @@ Just talk to your agent as you normally would — MetaClaw turns every live conv
 
 Under the hood, it places your model behind an OpenAI-compatible proxy that intercepts interactions from OpenClaw, injects relevant skills at each turn, and meta-learns from accumulated experience. Skills are summarized automatically after each session; with RL enabled, a meta-learning scheduler defers weight updates to idle windows so the agent is never interrupted during active use.
 
-No GPU cluster required. MetaClaw works with any OpenAI-compatible LLM API out of the box, and uses a Tinker-compatible backend for cloud-based LoRA training. [Tinker](https://www.thinkingmachines.ai/tinker/) is the default reference path, and MinT can be enabled through a separate compatibility package when needed.
+No GPU cluster required. MetaClaw works with any OpenAI-compatible LLM API out of the box, and uses a Tinker-compatible backend for cloud-based LoRA training. [Tinker](https://www.thinkingmachines.ai/tinker/) is the default reference path, and MinT can be enabled through the dedicated `.[mint]` extra when needed.
 
 ## 🤖 Key Features
 
@@ -161,13 +161,15 @@ Serving, reward modeling, and training are fully decoupled. The agent continues 
 
 ```bash
 pip install -e .                        # skills_only mode (lightweight)
-pip install -e ".[rl]"                  # + RL training support (torch, transformers, tinker)
+pip install -e ".[rl]"                  # + Tinker RL training support (torch, transformers, tinker)
+pip install -e ".[mint]"                # + MinT RL training support (mindlab-toolkit, tinker==0.6.0)
 pip install -e ".[evolve]"              # + skill evolution via OpenAI-compatible LLM
 pip install -e ".[scheduler]"           # + Google Calendar integration for scheduler
-pip install -e ".[rl,evolve,scheduler]" # recommended for full RL + scheduler setup
+pip install -e ".[rl,evolve,scheduler]" # recommended for full Tinker RL + scheduler setup
+pip install -e ".[mint,evolve,scheduler]" # recommended for full MinT RL + scheduler setup
 ```
 
-If you want to run `rl.backend=mint`, install the MinT compatibility package separately in the same environment, for example [`mindlab-toolkit`](https://github.com/MindLab-Research/mindlab-toolkit). MetaClaw keeps that dependency out of the default package so RL users can choose Tinker or MinT explicitly.
+Use `pip install -e ".[rl]"` for direct Tinker integration. Use `pip install -e ".[mint]"` when you want `rl.backend=mint`; it installs [`mindlab-toolkit`](https://github.com/MindLab-Research/mindlab-toolkit) and the compatible `tinker==0.6.0` automatically.
 
 ### 2. Configure
 
@@ -177,7 +179,7 @@ metaclaw setup
 
 The interactive wizard will ask you to choose your LLM provider (Kimi, Qwen, MiniMax, or custom), enter your API key, and optionally enable RL training.
 
-MetaClaw's RL path can switch explicitly between `tinker` and `mint`. `auto` is the recommended default and will still infer MinT from Mint-like credentials or base URLs when the MinT package is installed.
+MetaClaw's RL path can switch explicitly between `tinker` and `mint`. `auto` is still the recommended default and will infer MinT from `MINT_*` environment variables or MinT-style base URLs, but it now fails fast with an install hint if MinT support is missing from the environment.
 
 **Tinker**:
 
@@ -191,7 +193,7 @@ metaclaw config rl.model moonshotai/Kimi-K2.5
 
 ```bash
 metaclaw config rl.backend mint
-metaclaw config rl.api_key sk-mint-...
+metaclaw config rl.api_key your-mint-api-key
 metaclaw config rl.base_url https://mint.macaron.xin/
 metaclaw config rl.model Qwen/Qwen3-4B-Instruct-2507
 ```
@@ -325,11 +327,18 @@ metaclaw config rl.prm_api_key sk-...
 metaclaw start --mode rl
 ```
 
+Before you set `rl.backend=mint`, install the MinT extra in this environment:
+
+```bash
+pip install -e ".[mint]"
+```
+
 **MinT**:
 
 ```bash
+metaclaw config rl.enabled true
 metaclaw config rl.backend mint
-metaclaw config rl.api_key sk-mint-...
+metaclaw config rl.api_key your-mint-api-key
 metaclaw config rl.base_url https://mint.macaron.xin/
 metaclaw config rl.model Qwen/Qwen3-4B-Instruct-2507
 metaclaw config rl.prm_url https://api.openai.com/v1

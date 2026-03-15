@@ -20,6 +20,9 @@ if TYPE_CHECKING:
 
 _VALID_BACKENDS = {"auto", "tinker", "mint"}
 _BACKEND_LABELS = {"tinker": "Tinker", "mint": "MinT"}
+MINT_COMPAT_PACKAGE = "mindlab-toolkit"
+MINT_TINKER_VERSION = "0.6.0"
+MINT_INSTALL_COMMAND = 'pip install -e ".[mint]"'
 
 
 @dataclass(frozen=True)
@@ -89,10 +92,6 @@ def _module_available(name: str) -> bool:
     return importlib.util.find_spec(name) is not None
 
 
-def _looks_like_mint_api_key(value: str) -> bool:
-    return value.strip().startswith("sk-mint-")
-
-
 def _looks_like_mint_base_url(value: str) -> bool:
     candidate = value.strip()
     if not candidate:
@@ -100,22 +99,48 @@ def _looks_like_mint_base_url(value: str) -> bool:
     return "mint" in urlparse(candidate).netloc.lower()
 
 
+def looks_like_mint_configuration(api_key: str, base_url: str) -> bool:
+    del api_key
+    # API key formats are not stable enough to use as an inference signal.
+    return _looks_like_mint_base_url(base_url)
+
+
 def _has_mint_signal(config: "MetaClawConfig") -> bool:
     if _first_env("MINT_API_KEY", "MINT_BASE_URL"):
-        return True
-
-    key_candidates = (
-        configured_api_key(config),
-        os.environ.get("TINKER_API_KEY", ""),
-    )
-    if any(_looks_like_mint_api_key(value) for value in key_candidates):
         return True
 
     url_candidates = (
         configured_base_url(config),
         os.environ.get("TINKER_BASE_URL", ""),
     )
-    return any(_looks_like_mint_base_url(value) for value in url_candidates)
+    return any(looks_like_mint_configuration("", value) for value in url_candidates)
+
+
+def _mint_install_guidance() -> str:
+    return (
+        f"Install MinT support with: {MINT_INSTALL_COMMAND}. "
+        f"That extra installs '{MINT_COMPAT_PACKAGE}' and the compatible "
+        f"tinker=={MINT_TINKER_VERSION}."
+    )
+
+
+def _mint_missing_support_error(*, auto_detected: bool) -> RuntimeError:
+    if auto_detected:
+        prefix = "Detected MinT configuration via MINT_* env vars or base URL, but MinT support is not installed."
+    else:
+        prefix = "rl.backend=mint requires MinT support in this environment."
+    return RuntimeError(f"{prefix} {_mint_install_guidance()}")
+
+
+def _mint_import_error(exc: Exception, *, auto_detected: bool) -> RuntimeError:
+    if auto_detected:
+        prefix = "Detected MinT configuration via MINT_* env vars or base URL, but MinT could not be imported cleanly."
+    else:
+        prefix = "rl.backend=mint selected, but MinT could not be imported cleanly."
+    return RuntimeError(
+        f"{prefix} {_mint_install_guidance()} "
+        f"Original import error ({type(exc).__name__}): {exc}"
+    )
 
 
 def infer_backend_key(config: "MetaClawConfig") -> str:
@@ -143,19 +168,30 @@ def resolve_base_url(config: "MetaClawConfig", backend_key: str | None = None) -
     return _first_env(*_backend_env_order("base_url", key))
 
 
-def _import_backend_module(backend_key: str, configured_backend: str):
-    if backend_key == "mint" and configured_backend == "mint" and not _module_available("mint"):
-        raise RuntimeError(
-            "rl.backend=mint requires the MinT compatibility package. "
-            "Install 'mindlab-toolkit' in this environment or switch rl.backend to auto/tinker."
-        )
-    return importlib.import_module(backend_key)
+def _import_backend_module(backend_key: str, configured_backend: str, *, auto_detected: bool):
+    if backend_key != "mint":
+        return importlib.import_module(backend_key)
+
+    if not _module_available("mint"):
+        raise _mint_missing_support_error(auto_detected=auto_detected)
+
+    try:
+        return importlib.import_module("mint")
+    except Exception as exc:
+        raise _mint_import_error(exc, auto_detected=auto_detected) from exc
 
 
 def resolve_sdk_backend(config: "MetaClawConfig") -> SDKBackend:
     configured = configured_backend_name(config)
+    auto_detected = configured == "auto" and _has_mint_signal(config)
+    if auto_detected and not _module_available("mint"):
+        raise _mint_missing_support_error(auto_detected=True)
     key = infer_backend_key(config)
-    module = _import_backend_module(key, configured)
+    module = _import_backend_module(
+        key,
+        configured,
+        auto_detected=auto_detected and key == "mint",
+    )
     return SDKBackend(
         key=key,
         label=_BACKEND_LABELS[key],

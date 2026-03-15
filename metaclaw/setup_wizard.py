@@ -8,6 +8,12 @@ import os
 from pathlib import Path
 
 from .config_store import CONFIG_DIR, ConfigStore
+from .sdk_backend import (
+    MINT_COMPAT_PACKAGE,
+    MINT_INSTALL_COMMAND,
+    MINT_TINKER_VERSION,
+    looks_like_mint_configuration,
+)
 
 _PROVIDER_PRESETS = {
     "kimi": {
@@ -77,6 +83,14 @@ def _prompt_choice(msg: str, choices: list[str], default: str = "") -> str:
         if val in choices:
             return val
         print(f"  Invalid choice. Pick one of: {choices}")
+
+
+def _print_mint_install_hint() -> None:
+    print(
+        "\n[MetaClaw] MinT requires the optional compatibility layer.\n"
+        f"Install it in this environment first: {MINT_INSTALL_COMMAND}\n"
+        f"This path installs {MINT_COMPAT_PACKAGE} and tinker=={MINT_TINKER_VERSION}.\n"
+    )
 
 
 class SetupWizard:
@@ -177,6 +191,11 @@ class SetupWizard:
                     or os.environ.get("MINT_BASE_URL", "")
                 ),
             )
+            if backend == "mint" or (
+                backend == "auto"
+                and looks_like_mint_configuration(backend_api_key, backend_base_url)
+            ):
+                _print_mint_install_hint()
             prm_url = _prompt(
                 "PRM (reward model) URL",
                 default=rl_config.get("prm_url", "https://api.openai.com/v1"),

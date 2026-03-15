@@ -164,12 +164,14 @@ https://github.com/user-attachments/assets/d86a41a8-4181-4e3a-af0e-dc453a6b8594
 ```bash
 pip install -e .                        # وضع skills_only (خفيف الوزن)
 pip install -e ".[rl]"                  # + دعم تدريب RL (torch، transformers، tinker)
+pip install -e ".[mint]"                # + MinT RL training support (mindlab-toolkit, tinker==0.6.0)
 pip install -e ".[evolve]"              # + تطوير المهارات عبر LLM متوافق مع OpenAI
 pip install -e ".[scheduler]"           # + تكامل Google Calendar مع المُجدوِل
 pip install -e ".[rl,evolve,scheduler]" # موصى به: إعداد RL + مُجدوِل كامل
+pip install -e ".[mint,evolve,scheduler]" # recommended for full MinT RL + scheduler setup
 ```
 
-إذا كنت تريد استخدام `rl.backend=mint`، قم بتثبيت حزمة توافق MinT بشكل منفصل في نفس البيئة، مثل [`mindlab-toolkit`](https://github.com/MindLab-Research/mindlab-toolkit). لا يضمّن MetaClaw هذه التبعية في الحزمة الافتراضية حتى يتمكّن مستخدمو RL من اختيار Tinker أو MinT بشكل صريح.
+For MinT, prefer `pip install -e ".[mint]"`. That extra installs [`mindlab-toolkit`](https://github.com/MindLab-Research/mindlab-toolkit) and the compatible `tinker==0.6.0` automatically.
 
 ### 2. الإعداد
 
@@ -179,7 +181,7 @@ metaclaw setup
 
 سيرشدك المعالج التفاعلي لاختيار مزوّد LLM (Kimi أو Qwen أو MiniMax أو مخصّص)، وإدخال مفتاح API الخاص بك، وتفعيل تدريب RL اختياريًا.
 
-يمكن لمسار RL في MetaClaw التبديل صراحةً بين `tinker` و`mint`. القيمة الافتراضية الموصى بها هي `auto` وستظل تستنتج MinT من بيانات الاعتماد أو عناوين URL ذات النمط المشابه لـ Mint عندما تكون حزمة MinT مثبّتة.
+MetaClaw's RL path can switch explicitly between `tinker` and `mint`. `auto` still infers MinT from `MINT_*` environment variables or MinT-style base URLs, but now fails fast with an install hint if MinT support is missing.
 
 **Tinker** (الافتراضي):
 
@@ -193,7 +195,7 @@ metaclaw config rl.model moonshotai/Kimi-K2.5
 
 ```bash
 metaclaw config rl.backend mint
-metaclaw config rl.api_key sk-mint-...
+metaclaw config rl.api_key your-mint-api-key
 metaclaw config rl.base_url https://mint.macaron.xin/
 metaclaw config rl.model Qwen/Qwen3-4B-Instruct-2507
 ```
@@ -327,11 +329,18 @@ metaclaw config rl.prm_api_key sk-...
 metaclaw start --mode rl
 ```
 
+Before you set `rl.backend=mint`, install the MinT extra in this environment:
+
+```bash
+pip install -e ".[mint]"
+```
+
 **MinT**:
 
 ```bash
+metaclaw config rl.enabled true
 metaclaw config rl.backend mint
-metaclaw config rl.api_key sk-mint-...
+metaclaw config rl.api_key your-mint-api-key
 metaclaw config rl.base_url https://mint.macaron.xin/
 metaclaw config rl.model Qwen/Qwen3-4B-Instruct-2507
 metaclaw config rl.prm_url https://api.openai.com/v1
